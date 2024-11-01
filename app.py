@@ -5,6 +5,7 @@ def get_boxes(rows: int) -> list:
     boxes = [str(i) + str(j) for i in range(1, rows + 1) for j in range(1, rows + 1)]
     return boxes
 
+
 def is_solved(values: list) -> bool:
     for row in values:
         for cell in row:
@@ -13,6 +14,7 @@ def is_solved(values: list) -> bool:
             if len(cell) != 1:  # Check if the cell has a definite value
                 return False
     return True
+
 
 # Helper functions to find unique values.
 def find_unique_values(vals, rows, changed):
@@ -39,16 +41,19 @@ def find_unique_values(vals, rows, changed):
 
     return vals, changed
 
+
 def solver(initial_values: list) -> list:
     vals = initial_values
     rows = len(vals)
     # Step 1: Define the set of all possible values based on `rows`
     possible_val = "".join(str(i) for i in range(1, rows + 1))
-    
+
     # Step 2: Fill empty cells with the full range of possible values
     for i in range(rows):
         for j in range(rows):
-            if vals[i][j] == "":  # Assuming empty cells are represented by an empty string
+            if (
+                vals[i][j] == ""
+            ):  # Assuming empty cells are represented by an empty string
                 vals[i][j] = possible_val
 
     # Step 3: Iteratively apply constraints until no more changes
@@ -82,7 +87,7 @@ def solver(initial_values: list) -> list:
 
     if is_solved(vals):
         return vals
-    
+
     # TODO: Step 5 try all possible values in the first non-definite cell and recurse
     for i in range(rows):
         for j in range(rows):
@@ -106,15 +111,27 @@ def solver(initial_values: list) -> list:
     # Step 6 if no solution is found, raise an error
     raise ValueError("No solution found: a cell has no possible values")
 
+
+def format_values(values, n):
+    formatted_rows = []
+    for row in values:
+        formatted_row = " ".join(
+            f"{val:<{n}}" for val in row
+        )  # Pad each cell to width n
+        formatted_rows.append(formatted_row)
+    return "<pre>" + "<br>".join(formatted_rows) + "</pre>"
+
+
 app_ui = ui.page_fluid(
     ui.head_content(ui.include_js("app_py.js")),
-    ui.h2("AON Gap Challenge Solver (Generalized)"),
-    ui.h5("Type 1, 2, 3, 4 or 5 for shapes"),
-    ui.h5("Enter to submit, ~/` to clear"),
+    ui.h2("Gap Challenge Solver"),
+    ui.h6("Type 1, 2, 3, 4 or 5 for shapes"),
+    ui.h6("Press Enter to submit, ~/` to clear"),
     ui.input_select(
         "mode", "Number of rows/columns", choices=["3", "4", "5"], selected="3"
     ),
     # Input grid with numeric inputs
+    ui.h5("Values:"),
     ui.tags.div(
         ui.input_text("shape11", "", value=None),
         ui.input_text("shape12", "", value=None),
@@ -175,7 +192,7 @@ app_ui = ui.page_fluid(
             style="display: flex; gap: 10px;",
         ),
     ),
-    ui.output_ui(id="logger")
+    ui.output_ui(id="logger"),
 )
 
 
@@ -199,7 +216,7 @@ def server(input, output, session):
                 values.append(row)  # Append the row to form a 2D array
             try:
                 values = solver(values)
-                log.set(values)
+                log.set("")
                 # TODO: use ui.update_text to update the grid with definite values
                 for i in range(n):
                     for j in range(n):
@@ -209,8 +226,10 @@ def server(input, output, session):
                         if len(cell_value) == 1:
                             ui.update_text(box_id, value=cell_value)
             except ValueError as e:
-                log.set(str(e) + "<br>" + str(values))
+                # log.set(str(e) + "<br>" + "<br>".join(str(row) for row in values))
+                log.set(str(e) + "<br><br>" + format_values(values, n))
         elif input.keyid() == 96:  # clear input when ` or ~ is pressed
+            log.set("")
             boxes = get_boxes(int(input.mode()))
 
             def clear_box(box):
@@ -223,5 +242,6 @@ def server(input, output, session):
     @render.ui
     def logger():
         return ui.HTML(log())
+
 
 app = App(app_ui, server, debug=True)
