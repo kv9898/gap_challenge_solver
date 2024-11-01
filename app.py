@@ -45,7 +45,7 @@ def solver(values: list, rows: int) -> list:
 app_ui = ui.page_fluid(
     ui.head_content(ui.include_js("app_py.js")),
     ui.h2("AON Gap Challenge Solver (Generalized)"),
-    ui.h5("Type 1, 2, 3, 4 or 5 for shapes or ? for missing shape"),
+    ui.h5("Type 1, 2, 3, 4 or 5 for shapes"),
     ui.h5("Enter to submit, ~/` to clear"),
     ui.input_select(
         "mode", "Number of rows/columns", choices=["3", "4", "5"], selected="3"
