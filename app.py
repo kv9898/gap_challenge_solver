@@ -124,6 +124,12 @@ def format_values(values, n):
 
 app_ui = ui.page_fluid(
     ui.head_content(ui.include_js("app_py.js")),
+    ui.tags.head(
+        ui.tags.style(
+            ".container-fluid {  max-width: 500px;}",
+            type="text/css"
+        )
+    ),
     ui.h2("Gap Challenge Solver"),
     ui.h6("Type 1, 2, 3, 4 or 5 for shapes"),
     ui.h6("Computer shortcuts: Enter to submit, ~/` to clear"),
