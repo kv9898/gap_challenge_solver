@@ -1,9 +1,7 @@
 $(document).on("keyup", function (event) {
   if (event.key == "Enter") {
     Shiny.setInputValue("key", event.key, { priority: "event" });
-    console.log(event.key);
   } else if (event.key == "`") {
-    console.log(event.key);
     Shiny.setInputValue("key", event.key, { priority: "event" });
   } else {
     Shiny.setInputValue("key", "");
