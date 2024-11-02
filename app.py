@@ -126,7 +126,7 @@ app_ui = ui.page_fluid(
     ui.head_content(ui.include_js("app_py.js")),
     ui.h2("Gap Challenge Solver"),
     ui.h6("Type 1, 2, 3, 4 or 5 for shapes"),
-    ui.h6("Press Enter to submit, ~/` to clear"),
+    ui.h6("Computer shortcuts: Enter to submit, ~/` to clear"),
     ui.input_select(
         "mode", "Number of rows/columns", choices=["3", "4", "5"], selected="3"
     ),
@@ -192,6 +192,11 @@ app_ui = ui.page_fluid(
             style="display: flex; gap: 10px;",
         ),
     ),
+    ui.div(
+        ui.input_action_button("submit", "Submit"),
+        ui.input_action_button("clear", "Clear"),
+        style="display: flex; gap: 10px;",
+    ),
     ui.output_ui(id="logger"),
 )
 
@@ -199,44 +204,61 @@ app_ui = ui.page_fluid(
 def server(input, output, session):
     log = reactive.value("")
 
-    @reactive.effect
-    @reactive.event(input.keyid)
-    def _():
-        if input.keyid() == 13:  # organise inputs into an array
-            n = int(input.mode())
-            boxes = get_boxes(n)
+    def clear():
+        log.set("")
+        boxes = get_boxes(int(input.mode()))
 
-            def get_value(box):
-                return getattr(input, f"shape{box}")()
+        def clear_box(box):
+            
+            ui.update_text("shape" + box, value="")
 
-            values = []
-            for i in range(1, n + 1):
-                row_boxes = boxes[(i - 1) * n : (i - 1) * n + n]
-                row = list(map(get_value, row_boxes))
-                values.append(row)  # Append the row to form a 2D array
-            try:
-                values = solver(values)
-                log.set("")
-                # TODO: use ui.update_text to update the grid with definite values
-                for i in range(n):
-                    for j in range(n):
-                        box_id = f"shape{boxes[i * n + j]}"
-                        cell_value = values[i][j]
-                        # Update only if the cell has a definite value (single character)
-                        if len(cell_value) == 1:
-                            ui.update_text(box_id, value=cell_value)
-            except ValueError as e:
-                # log.set(str(e) + "<br>" + "<br>".join(str(row) for row in values))
-                log.set(str(e) + "<br><br>" + format_values(values, n))
-        elif input.keyid() == 96:  # clear input when ` or ~ is pressed
+        for box in boxes:
+            clear_box(box)
+
+    def submit():
+        n = int(input.mode())
+        boxes = get_boxes(n)
+
+        def get_value(box):
+            return getattr(input, f"shape{box}")()
+
+        values = []
+        for i in range(1, n + 1):
+            row_boxes = boxes[(i - 1) * n : (i - 1) * n + n]
+            row = list(map(get_value, row_boxes))
+            values.append(row)  # Append the row to form a 2D array
+        try:
+            values = solver(values)
             log.set("")
-            boxes = get_boxes(int(input.mode()))
+            # TODO: use ui.update_text to update the grid with definite values
+            for i in range(n):
+                for j in range(n):
+                    box_id = f"shape{boxes[i * n + j]}"
+                    cell_value = values[i][j]
+                    # Update only if the cell has a definite value (single character)
+                    if len(cell_value) == 1:
+                        ui.update_text(box_id, value=cell_value)
+        except ValueError as e:
+            # log.set(str(e) + "<br>" + "<br>".join(str(row) for row in values))
+            log.set(str(e) + "<br><br>" + format_values(values, n))
+    
+    @reactive.effect
+    @reactive.event(input.key)
+    def key():
+        if input.key() == "Enter":  # organise inputs into an array
+            submit()
+        elif input.key() == "`":  # clear input when ` or ~ is pressed
+            clear()
 
-            def clear_box(box):
-                ui.update_text("shape" + box, value="")
+    @reactive.effect
+    @reactive.event(input.clear)
+    def button_clear():
+        clear()
 
-            for box in boxes:
-                clear_box(box)
+    @reactive.effect
+    @reactive.event(input.submit)
+    def button_submit():
+        submit()
 
     @output
     @render.ui
