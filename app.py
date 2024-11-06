@@ -19,6 +19,19 @@ def format_values(values: list[list[str]], n: int) -> str:
         formatted_rows.append(formatted_row)
     return "<pre>" + "<br>".join(formatted_rows) + "</pre>"
 
+def is_value(value: str, rows: int) -> bool:
+    """
+    Check if a string is a valid value in the grid.
+
+    Args:
+        value (str): The string to check.
+        rows (int): The number of rows in the grid.
+
+    Returns:
+        bool: True if the string is a valid value, False otherwise.
+    """
+    return value in [str(i) for i in range(1, rows + 1)] or value == ""
+
 
 app_ui = ui.page_fluid(
     # Load JavaScript code from app_py.js
@@ -111,9 +124,14 @@ app_ui = ui.page_fluid(
 
 
 def server(input, output, session):
+    
     log = reactive.value("")
 
     def clear():
+        """
+        Clear the input grid and log output when the 'Clear' button is clicked or shortcut is pressed.
+        """
+    
         log.set("")
         boxes = get_boxes(int(input.mode()))
 
@@ -128,14 +146,33 @@ def server(input, output, session):
         n = int(input.mode())
         boxes = get_boxes(n)
 
-        def get_value(box):
-            return getattr(input, f"shape{box}")()
+        def get_value(box: str) -> str:
+            """
+            Get the value of a box in the grid, or raise a ValueError if the value is invalid.
+
+            Args:
+                box (str): The ID of the box, e.g. "11".
+            Returns:
+                str: The value of the box, or an empty string if not provided.
+            Raises:
+                ValueError: If the value is invalid.
+            """
+            value = getattr(input, f"shape{box}")()
+            if is_value(value, n):
+                return value
+            else:
+                raise ValueError(f"Invalid value for box ({", ".join(box)}): {value}")
+
 
         values = []
-        for i in range(1, n + 1):
-            row_boxes = boxes[(i - 1) * n : (i - 1) * n + n]
-            row = list(map(get_value, row_boxes))
-            values.append(row)  # Append the row to form a 2D array
+        try:
+            for i in range(1, n + 1):
+                row_boxes = boxes[(i - 1) * n : (i - 1) * n + n]
+                row = list(map(get_value, row_boxes))
+                values.append(row)  # Append the row to form a 2D array
+        except ValueError as e: # Dealing of invalid input
+            log.set(str(e))
+            return
         try:
             values = solver(values)
             log.set("")
