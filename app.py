@@ -2,7 +2,15 @@ from shiny import App, ui, reactive, render
 from engine import *
 
 
-def format_values(values, n):
+def format_values(values: list[list[str]], n: int) -> str:
+    """
+    Format a 2D list of values into a string with HTML preformatted text for error messages.
+
+    :param values: A 2D list where each element is a string representing a value in the grid.
+    :param n: The width to pad each cell in the formatted output.
+    :return: A formatted string with each row joined by '<br>' and each cell
+             padded to width 'n', wrapped in HTML <pre> tags.
+    """
     formatted_rows = []
     for row in values:
         formatted_row = " ".join(
@@ -13,19 +21,24 @@ def format_values(values, n):
 
 
 app_ui = ui.page_fluid(
+    # Load JavaScript code from app_py.js
     ui.head_content(ui.include_js("app_py.js")),
     ui.tags.head(
+        # Set max-width to 500px for the whole page
         ui.tags.style(".container-fluid {  max-width: 500px;}", type="text/css")
     ),
+    # Title and instructions
     ui.h2("Gap Challenge Solver"),
     ui.h6("Type 1, 2, 3, 4 or 5 for shapes"),
     ui.h6("Computer shortcuts: Enter to submit, ~/` to clear"),
+    # Select number of rows/columns
     ui.input_select(
         "mode", "Number of rows/columns", choices=["3", "4", "5"], selected="3"
     ),
     # Input grid with numeric inputs
     ui.h5("Values:"),
     ui.tags.div(
+        # Create the input fields for the grid, depending on the number of rows/columns
         ui.input_text("shape11", "", value=None),
         ui.input_text("shape12", "", value=None),
         ui.input_text("shape13", "", value=None),
@@ -85,13 +98,16 @@ app_ui = ui.page_fluid(
             style="display: flex; gap: 10px;",
         ),
     ),
+    # Submit and clear buttons
     ui.div(
         ui.input_action_button("submit", "Submit"),
         ui.input_action_button("clear", "Clear"),
         style="display: flex; gap: 10px;",
     ),
+    # The output of the solver will be displayed here
     ui.output_ui(id="logger"),
 )
+
 
 
 def server(input, output, session):
