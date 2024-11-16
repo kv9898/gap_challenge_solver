@@ -1,1 +1,4 @@
+matplotlib==3.8.4
+numpy==2.1.3
+opencv_python==4.10.0.84
 shiny==1.1.0
