@@ -44,21 +44,26 @@ def detect_shapes(image: bytes, grid_size: int, AON: bool = True):
     for label, (template, threshold) in templates.items() if AON else templates_prac.items():
         h, w = template.shape
         
-        # Perform template matching
-        result = cv2.matchTemplate(grid_image, template, method)
-        
-        # Set a threshold for detecting matches
-        #threshold = 0.8
-        locations = np.where(result >= threshold)
-        
-        for pt in zip(*locations[::-1]):  # Reverse to get x, y positions
-            # Calculate the row and column in the grid
-            col = pt[0] // cell_width
-            row = pt[1] // cell_height
-            
-            # Check if row and column are within grid bounds
-            if 0 <= row < grid_size and 0 <= col < grid_size:
-                output_matrix[row][col] = label
+        # Define scale range
+        scale_range = np.linspace(0.8, 1.2, 10)  # Adjust scale range as needed
+
+        for scale in scale_range:
+            # Resize template
+            scaled_template = cv2.resize(template, (int(w * scale), int(h * scale)))
+
+            # Perform template matching
+            result = cv2.matchTemplate(grid_image, scaled_template, method)
+            locations = np.where(result >= threshold)
+
+            # Update the output matrix with the detected locations
+            for pt in zip(*locations[::-1]):  # Reverse to get x, y positions
+                # Calculate the row and column in the grid
+                col = pt[0] // cell_width
+                row = pt[1] // cell_height
+
+                # Check if row and column are within grid bounds
+                if 0 <= row < grid_size and 0 <= col < grid_size:
+                    output_matrix[row][col] = label
 
     return output_matrix
 
@@ -78,7 +83,7 @@ if __name__ == "__main__":
     
     # Test practice grid
     print("-----------------------")
-    with open('www/test_files/prac.png', 'rb') as f:
+    with open('www/test_files/prac2.png', 'rb') as f:
         image = f.read()
 
     # Run the detection
