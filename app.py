@@ -50,7 +50,7 @@ app_ui = ui.page_fluid(
     ui.h6("Computer shortcuts: Enter to submit, ~/` to clear"),
     # Select number of rows/columns
     ui.input_select(
-        "mode", "Number of rows/columns", choices=["3", "4", "5"], selected="3"
+        "mode", "Number of rows/columns:", choices=["3", "4", "5"], selected="3"
     ),
     # Input grid with numeric inputs
     ui.h5("Values:"),
@@ -119,6 +119,7 @@ app_ui = ui.page_fluid(
     ui.div(
         ui.input_action_button("submit", "Submit"),
         ui.input_action_button("clear", "Clear"),
+        ui.input_action_button("change", "To Practice"),
         style="display: flex; gap: 10px;",
     ),
     # The output of the solver will be displayed here
@@ -129,6 +130,7 @@ app_ui = ui.page_fluid(
 def server(input, output, session):
 
     log = reactive.value("")
+    AON = reactive.value(True)
 
     def clear():
         """
@@ -199,7 +201,7 @@ def server(input, output, session):
         # Decode the base64 data and convert it into an image
         image_data = base64.b64decode(base64_data)
 
-        detected = detect_shapes(image_data, int(input.mode()))
+        detected = detect_shapes(image_data, int(input.mode()), AON())
 
         # Print the detected shapes in input boxes
         for i in range(len(detected)):
@@ -226,6 +228,18 @@ def server(input, output, session):
     @reactive.event(input.submit)
     def button_submit():
         submit()
+
+    @reactive.effect
+    @reactive.event(input.change)
+    def button_change():
+        if AON():
+            AON.set(False)
+            ui.update_action_button(id="change", label="To AON")
+            log.set("Detecting patterns from the practice site...")
+        else:
+            AON.set(True)
+            ui.update_action_button(id="change", label="To Practice")
+            log.set("Detecting patterns from the AON site...")
 
     @output
     @render.ui
