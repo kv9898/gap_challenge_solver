@@ -1,5 +1,7 @@
 from shiny import App, ui, reactive, render
+import base64
 from engine import *
+from cv import detect_shapes
 
 
 def format_values(values: list[list[str]], n: int) -> str:
@@ -18,6 +20,7 @@ def format_values(values: list[list[str]], n: int) -> str:
         )  # Pad each cell to width n
         formatted_rows.append(formatted_row)
     return "<pre>" + "<br>".join(formatted_rows) + "</pre>"
+
 
 def is_value(value: str, rows: int) -> bool:
     """
@@ -122,16 +125,15 @@ app_ui = ui.page_fluid(
 )
 
 
-
 def server(input, output, session):
-    
+
     log = reactive.value("")
 
     def clear():
         """
         Clear the input grid and log output when the 'Clear' button is clicked or shortcut is pressed.
         """
-    
+
         log.set("")
         boxes = get_boxes(int(input.mode()))
 
@@ -163,20 +165,19 @@ def server(input, output, session):
             else:
                 raise ValueError(f"Invalid value for box ({", ".join(box)}): {value}")
 
-
         values = []
         try:
             for i in range(1, n + 1):
                 row_boxes = boxes[(i - 1) * n : (i - 1) * n + n]
                 row = list(map(get_value, row_boxes))
                 values.append(row)  # Append the row to form a 2D array
-        except ValueError as e: # Dealing of invalid input
+        except ValueError as e:  # Dealing of invalid input
             log.set(str(e))
             return
         try:
             values = solver(values)
             log.set("")
-            # TODO: use ui.update_text to update the grid with definite values
+            # use ui.update_text to update the grid with definite values
             for i in range(n):
                 for j in range(n):
                     box_id = f"shape{boxes[i * n + j]}"
@@ -187,6 +188,25 @@ def server(input, output, session):
         except ValueError as e:
             # log.set(str(e) + "<br>" + "<br>".join(str(row) for row in values))
             log.set(str(e) + "<br><br>" + format_values(values, n))
+
+    @reactive.effect
+    @reactive.event(input.paste_image)
+    def paste_image():
+        # Remove the base64 header (e.g., "data:image/png;base64,")
+        base64_data = input.paste_image().split(",")[1]
+
+        # Decode the base64 data and convert it into an image
+        image_data = base64.b64decode(base64_data)
+
+        detected = detect_shapes(image_data, int(input.mode()))
+
+        # Print the detected shapes in input boxes
+        for i in range(len(detected)):
+            for j in range(len(detected[i])):
+                box_id = (
+                    f"shape{get_boxes(int(input.mode()))[i * len(detected[i]) + j]}"
+                )
+                ui.update_text(box_id, value=detected[i][j])
 
     @reactive.effect
     @reactive.event(input.key)
