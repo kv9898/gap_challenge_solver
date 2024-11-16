@@ -1,5 +1,6 @@
 from shiny import App, ui, reactive, render
 import base64
+from pathlib import Path
 from engine import *
 from cv import detect_shapes
 
@@ -232,4 +233,4 @@ def server(input, output, session):
         return ui.HTML(log())
 
 
-app = App(app_ui, server, debug=True)
+app = App(app_ui, server, static_assets=Path(__file__).parent / "www")

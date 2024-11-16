@@ -3,12 +3,12 @@ import numpy as np
 
 # Load each shape template
 templates = {
-    "2": (cv2.imread('cv_template/star2.png', cv2.IMREAD_GRAYSCALE), 0.8),
-    "3": (cv2.imread('cv_template/cross3.png', cv2.IMREAD_GRAYSCALE), 0.7),
-    "1": (cv2.imread('cv_template/circle1.png', cv2.IMREAD_GRAYSCALE), 0.95),
-    "4": (cv2.imread('cv_template/triangle4.png', cv2.IMREAD_GRAYSCALE), 0.9),
-    "5": (cv2.imread('cv_template/square5.png', cv2.IMREAD_GRAYSCALE), 0.9),
-    #"?": (cv2.imread('cv_template/question.png', cv2.IMREAD_GRAYSCALE), 0.8)#,
+    "2": (cv2.imread('www/star2.png', cv2.IMREAD_GRAYSCALE), 0.8),
+    "3": (cv2.imread('www/cross3.png', cv2.IMREAD_GRAYSCALE), 0.7),
+    "1": (cv2.imread('www/circle1.png', cv2.IMREAD_GRAYSCALE), 0.95),
+    "4": (cv2.imread('www/triangle4.png', cv2.IMREAD_GRAYSCALE), 0.9),
+    "5": (cv2.imread('www/square5.png', cv2.IMREAD_GRAYSCALE), 0.9),
+    #"?": (cv2.imread('www/question.png', cv2.IMREAD_GRAYSCALE), 0.8)#,
     #"": (cv2.imread('cv2test/img/empty.png', cv2.IMREAD_GRAYSCALE), 0.8)
 }
 
@@ -54,9 +54,8 @@ def detect_shapes(image: bytes, grid_size: int = 5):
 if __name__ == "__main__":
     from io import BytesIO
     # Load the grid image as bytes
-    with open('cv_template/test_files/full.png', 'rb') as f:
+    with open('www/test_files/full.png', 'rb') as f:
         image = f.read()
-    # grid_image = cv2.imread('cv_template/full.png', cv2.IMREAD_GRAYSCALE)
 
     # Run the detection
     output_matrix = detect_shapes(image, 5)
