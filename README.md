@@ -16,6 +16,10 @@ We then enter the existing patterns using numbers:
 
 ![](img/featured.png "Enter the existing patterns using numbers")
 
+Alternatively, we can also snip the patterns from the screen and paste them into the solver:
+
+![](img/pasted.gif "Snip and paste the patterns")
+
 Then hit `Enter` (if you are using a computer) or press the `Submit` button. If the problem is entered correctly, a full solution will be displayed:
 
 ![](img/answer.png "The solution")
