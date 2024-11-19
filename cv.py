@@ -4,8 +4,8 @@ import numpy as np
 # Load each shape template
 templates = {
     "2": (cv2.imread('www/star2.png', cv2.IMREAD_GRAYSCALE), 0.8),
-    "3": (cv2.imread('www/cross3.png', cv2.IMREAD_GRAYSCALE), 0.7),
-    "1": (cv2.imread('www/circle1.png', cv2.IMREAD_GRAYSCALE), 0.95),
+    "3": (cv2.imread('www/cross3.png', cv2.IMREAD_GRAYSCALE), 0.75),
+    "1": (cv2.imread('www/circle1.png', cv2.IMREAD_GRAYSCALE), 0.96),
     "4": (cv2.imread('www/triangle4.png', cv2.IMREAD_GRAYSCALE), 0.9),
     "5": (cv2.imread('www/square5.png', cv2.IMREAD_GRAYSCALE), 0.9),
     #"?": (cv2.imread('www/question.png', cv2.IMREAD_GRAYSCALE), 0.8)#,
