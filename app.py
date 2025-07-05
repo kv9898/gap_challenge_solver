@@ -1,8 +1,8 @@
 from shiny import App, ui, reactive, render
 import base64
 from pathlib import Path
-# from engine import solve_grid as solver
-from old_engine import solver
+from engine import solve_grid as solver
+# from old_engine import solver
 from cv import detect_shapes
 
 from time import perf_counter
