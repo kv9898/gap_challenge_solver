@@ -9,3 +9,7 @@ dependencies = [
     "opencv-python==4.10.0.84",
     "shiny==1.1.0",
 ]
+
+[tool.maturin]
+python-source = "python"
+module-name = "engine"

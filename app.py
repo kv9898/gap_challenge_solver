@@ -1,9 +1,21 @@
 from shiny import App, ui, reactive, render
 import base64
 from pathlib import Path
-from engine import *
+# from engine import solve_grid as solver
+from old_engine import solver
 from cv import detect_shapes
 
+from time import perf_counter
+
+def get_boxes(rows: int) -> list[str]:
+    """
+    Generate a list of string IDs for each cell in the grid.
+
+    :param rows: The number of rows (and columns) in the grid.
+    :return: A list of string IDs for each cell in the grid, e.g. ['11', '12', ...]
+    """
+    boxes: list[str] = [str(i) + str(j) for i in range(1, rows + 1) for j in range(1, rows + 1)]
+    return boxes
 
 def format_values(values: list[list[str]], n: int) -> str:
     """
@@ -178,7 +190,11 @@ def server(input, output, session):
             log.set(str(e))
             return
         try:
+            start_time = perf_counter()
             values = solver(values)
+            end_time = perf_counter()
+            print(f"Time taken: {end_time - start_time:.9f} seconds")
+
             log.set("")
             # use ui.update_text to update the grid with definite values
             for i in range(n):

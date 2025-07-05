@@ -1,17 +1,3 @@
-import time
-
-def get_boxes(rows: int) -> list[str]:
-    """
-    Generate a list of string IDs for each cell in the grid.
-
-    :param rows: The number of rows (and columns) in the grid.
-    :return: A list of string IDs for each cell in the grid, e.g. ['11', '12', ...]
-    """
-    boxes: list[str] = [str(i) + str(j) for i in range(1, rows + 1) for j in range(1, rows + 1)]
-    return boxes
-
-
-
 def is_solved(values: list[list[str]]) -> bool:
     """
     Check if the puzzle is completely solved.
@@ -101,8 +87,6 @@ def solver(initial_values: list[list[str]]) -> list[list[str]]:
     Raises:
         ValueError: If no solution is found for the puzzle.
     """
-    start_time: float = time.time()
-    
     vals: list[list[str]] = initial_values
     rows: int = len(vals)
     possible_val: str = "".join(str(i) for i in range(1, rows + 1))
@@ -143,8 +127,6 @@ def solver(initial_values: list[list[str]]) -> list[list[str]]:
         vals, changed = find_unique_values(vals, rows, changed)
 
     if is_solved(vals):
-        end_time: float = time.time()
-        print(f"Time taken: {end_time - start_time} seconds")
         return vals
 
     # If no solution has been found, try each possible value in each cell and
@@ -156,9 +138,7 @@ def solver(initial_values: list[list[str]]) -> list[list[str]]:
                     vals_copy: list[list[str]] = [row[:] for row in vals]
                     vals_copy[i][j] = possible_value
                     try:
-                        vals = solver(vals_copy)
-                        end_time: float = time.time()
-                        print(f"Time taken: {end_time - start_time} seconds")
+                        vals = solver(vals_copy)                     
                         return vals
                     except ValueError:
                         continue
