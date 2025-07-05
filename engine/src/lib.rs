@@ -1,3 +1,4 @@
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 /// A Python module implemented in Rust.
@@ -11,17 +12,12 @@ type Grid = Vec<Vec<String>>;
 
 #[pyfunction]
 fn solve_grid(mut grid: Grid) -> PyResult<Vec<Vec<String>>> {
-    if solver(&mut grid) {
-        Ok(grid)
-    } else {
-        Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-            "No solution found",
-        ))
-    }
+    solver(&mut grid)?;
+    Ok(grid)
 }
 
 // Main solver logic
-fn solver(vals: &mut Grid) -> bool {
+fn solver(vals: &mut Grid) -> Result<(), PyErr> {
     let rows = vals.len();
     let possible_vals = (1..=rows)
         .map(|i| i.to_string())
@@ -70,8 +66,8 @@ fn solver(vals: &mut Grid) -> bool {
         }
     }
 
-    if is_solved(vals) {
-        return true;
+    if is_solved(vals)? {
+        return Ok(());
     }
 
     // Backtracking
@@ -82,31 +78,33 @@ fn solver(vals: &mut Grid) -> bool {
                     let mut vals_copy = vals.clone();
                     vals_copy[i][j] = ch.to_string();
 
-                    if solver(&mut vals_copy) {
+                    if solver(&mut vals_copy).is_ok() {
                         *vals = vals_copy;
-                        return true;
+                        return Ok(());
                     }
                 }
-                return false;
+                return Err(PyErr::new::<PyValueError, _>("No solution found"));
             }
         }
     }
 
-    false
+    return Err(PyErr::new::<PyValueError, _>("No solution found"));
 }
 
-fn is_solved(grid: &Grid) -> bool {
+fn is_solved(grid: &Grid) -> Result<bool, PyErr> {
     for row in grid {
         for cell in row {
             if cell.is_empty() {
-                return false;
+                return Err(PyErr::new::<PyValueError, _>(
+                    "No solution found: a cell has no possible values",
+                ));
             }
             if cell.len() != 1 {
-                return false;
+                return Ok(false);
             }
         }
     }
-    true
+    Ok(true)
 }
 
 fn find_unique_values(vals: &mut Grid) -> bool {
